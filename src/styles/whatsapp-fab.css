@@ -1,0 +1,47 @@
+/* ===== Shared WhatsApp Floating Button ===== */
+.wa-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 56px;
+  height: 56px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 24px rgba(37, 211, 102, 0.4);
+  z-index: 9999;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+}
+
+.wa-fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 32px rgba(37, 211, 102, 0.5);
+}
+
+.wa-fab svg {
+  width: 28px;
+  height: 28px;
+  fill: #fff;
+}
+
+.wa-fab-pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid #25D366;
+  animation: waFabPulse 2s infinite;
+  pointer-events: none;
+}
+
+@keyframes waFabPulse {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(1.4); opacity: 0;   }
+}
+
+@media (max-width: 768px) {
+  .wa-fab { bottom: 20px; right: 20px; }
+}
