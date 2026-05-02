@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import HeroSection from '@/components/home/HeroSection'
 import ClientLogos from '@/components/home/ClientLogos'
 import ProblemSolution from '@/components/home/ProblemSolution'
@@ -11,6 +12,13 @@ import FaqSection from '@/components/home/FaqSection'
 import FinalCTA from '@/components/home/FinalCTA'
 
 export default function HomePage() {
+  useEffect(() => {
+    if (window.location.hash) {
+      const el = document.querySelector(window.location.hash)
+      if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 100)
+    }
+  }, [])
+
   return (
     <main>
       <HeroSection />
