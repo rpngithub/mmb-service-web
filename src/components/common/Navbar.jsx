@@ -31,7 +31,7 @@ export default function Navbar() {
       <nav className={`navbar${scrolled ? ' scrolled' : ''}`} id="navbar">
         <div className="container">
           <Link to="/" className="nav-logo">
-            <img src="/images/mmb-logo-white.svg" alt="MMB" className="nav-logo-img" />
+            <img src={`/images/${scrolled ? 'mmb-logo' : 'mmb-logo-white'}.svg`} alt="MMB" className="nav-logo-img" />
           </Link>
           <div className={`nav-links${menuOpen ? ' open' : ''}`} id="navLinks">
             <a href={isHome ? '#features' : '/#features'} onClick={(e) => handleNavLink(e, '#features')}>Services</a>
@@ -44,7 +44,7 @@ export default function Navbar() {
             ) : (
               <Link to="/signin" className="nav-signin">Sign In</Link>
             )}
-            <Link to="/register" className="btn btn-primary nav-cta">Free Designs</Link>
+            <Link to="/register" className="btn btn-primary nav-cta" onClick={() => localStorage.removeItem('activate')}>Free Designs</Link>
           </div>
           <div
             className={`hamburger${menuOpen ? ' active' : ''}`}

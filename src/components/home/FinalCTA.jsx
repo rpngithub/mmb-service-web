@@ -16,6 +16,7 @@ export default function FinalCTA() {
             to="/register"
             className="btn btn-primary"
             style={{ fontSize: '1.05rem', padding: '16px 40px' }}
+            onClick={() => localStorage.removeItem('activate')}
           >
             🎨 Try 3 FREE Designs
             <span className="arrow">→</span>

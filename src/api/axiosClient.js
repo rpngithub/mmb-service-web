@@ -14,6 +14,7 @@ client.interceptors.request.use((config) => {
 
 let isRefreshing = false
 let failedQueue = []
+const REFRESH_ERROR_CODES = ['NO_TOKEN', 'INVALID_TOKEN', 'INVALID_OR_EXPIRED_TOKEN', 'TOKEN_REVOKED']
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach((prom) => {
@@ -26,9 +27,17 @@ const processQueue = (error, token = null) => {
 client.interceptors.response.use(
   (response) => response,
   async (error) => {
+    console.log('API error:', error)
+    console.log('Error response data:', error.response?.data)
+    const errorResponse = error.response?.data || {}
+    let errorCode = errorResponse.code || '';
+    if (errorCode) {
+      console.error('API error message:', errorCode, errorResponse.error)
+    }
+    
     const originalRequest = error.config
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && REFRESH_ERROR_CODES.includes(errorCode) && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })

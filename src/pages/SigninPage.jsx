@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import axios from 'axios'
 import { useAuth } from '@/contexts/AuthContext'
 import { useOtpTimer } from '@/hooks/useOtpTimer'
 import { signinMobileStep1, signinMobileStep2 } from '@/api/authService'
+import { getProfile } from '@/api/profileService'
 import OtpInput from '@/components/ui/OtpInput'
 import WhatsAppFAB from '@/components/common/WhatsAppFAB'
 import '@/styles/register.css'
@@ -48,7 +50,8 @@ export default function SigninPage() {
       setStep(2)
       startTimer()
     } catch (err) {
-      setMobileError(err.response?.data?.message || 'Failed to send OTP. Please try again.')
+      console.error('Failed to send OTP:', err)
+      setMobileError(err.response?.data?.error || 'Failed to send OTP. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -60,10 +63,13 @@ export default function SigninPage() {
     setOtpError('')
     try {
       const { data } = await signinMobileStep2({ mobile, transaction_id: txnId, otp })
-      login(data.accessToken, data.user)
+      console.log('Login successful:', data);
+      login(data.accessToken, null)
+      setLoading(false)
       navigate(from, { replace: true })
     } catch (err) {
-      setOtpError(err.response?.data?.message || 'Invalid OTP. Please try again.')
+      console.error('OTP verification failed:', err)
+      setOtpError(err.response?.data?.error || 'Invalid OTP. Please try again.')
     } finally {
       setLoading(false)
     }

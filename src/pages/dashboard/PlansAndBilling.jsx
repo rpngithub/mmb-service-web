@@ -26,15 +26,33 @@ const FALLBACK_PLANS = [
 ]
 
 export default function PlansAndBilling() {
-  const { user } = useAuth()
+  const { user, subscription, freeTrial } = useAuth()
   const [plans, setPlans] = useState(FALLBACK_PLANS)
   const [loading, setLoading] = useState(null)
   const [toast, setToast] = useState('')
 
   useEffect(() => {
     getPlans()
-      .then(({ data }) => { if (Array.isArray(data) && data.length > 0) setPlans(data) })
-      .catch(() => {})
+      .then(({ data }) => {
+        if (Array.isArray(data) && data.length > 0) {
+          data.sort((a, b) => a.price - b.price) // Sort plans by price ascending
+          console.log('Fetched plans:', data)
+          const mapped = data.map((p, i) => ({
+            id: p.id,
+            emoji: ['🟢', '🔵', '🟣'][i] || '⚪',
+            name: p.name,
+            originalPrice: p.original_price ? `₹${p.original_price}`.replace('.00', '') : '', // handle missing originalPrice
+            price: `₹${p.price}`.replace('.00', ''), // need to replace .00 with ₹ and remove decimals
+            desc: p.description || '',
+            features: Object.entries(p.features || {}).map(([k, v]) => `${v} ${k}`),
+            cta: i === 1 ? 'Get Started' : 'Start Now',
+            popular: p.popular || false,
+          }))
+
+          setPlans(mapped)
+        }
+      })
+      .catch(() => { })
   }, [])
 
   const showToast = (msg) => {
@@ -80,8 +98,13 @@ export default function PlansAndBilling() {
       <div className="db-current-plan db-card">
         <div className="db-current-plan-info">
           <span className="db-current-plan-badge">Current Plan</span>
-          <h3>{user?.subscription?.plan?.name || 'Free Plan'}</h3>
-          <p>3 one-time designs • No monthly content</p>
+          <h3>{subscription?.plan_name || 'Free Plan'}</h3>
+          {subscription ? (
+            <p>Design as per plan</p>
+          ) : (
+            <p>Enjoy your free trial with 3 one-time designs. Upgrade for more features!</p>
+          )}
+          
         </div>
         <button
           className="db-action-btn primary"
@@ -95,7 +118,7 @@ export default function PlansAndBilling() {
         <h2 className="db-section-heading">Choose Your Plan</h2>
         <div className="db-plans-grid">
           {plans.map((plan) => (
-            <div key={plan.id} className={`db-plan-card${plan.popular ? ' popular' : ''}`}>
+            <div key={plan.id} className={`db-plan-card ${plan.popular ? 'popular' : ''}`}>
               {plan.popular && <div className="db-plan-popular-badge">⭐ Most Popular</div>}
               <div className="db-plan-name">{plan.emoji} {plan.name}</div>
               <div className="db-plan-price">
