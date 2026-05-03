@@ -56,12 +56,12 @@ const NAV_ITEMS = [
 ]
 
 export default function DashboardLayout() {
-  const { user, logout } = useAuth()
+  const { user, subscription, freeTrial, logout } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const userName = user?.name || 'User'
   const userInitial = userName.charAt(0).toUpperCase()
-  const userPlan = user?.subscription?.plan?.name || 'Free Plan'
+  const userPlan = subscription ? subscription.plan_name : (freeTrial ? 'Free Plan' : 'Unsubscribed')
 
   const closeSidebar = () => setSidebarOpen(false)
 

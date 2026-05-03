@@ -72,7 +72,7 @@ export default function HeroSection() {
           Monthly social media creatives and reels designed for your brand—delivered ready to post, without the stress.
         </p>
         <div className="hero-ctas">
-          <Link to="/register" className="btn btn-primary">
+          <Link to="/register" className="btn btn-primary" onClick={() => localStorage.removeItem('activate')}>
             🎨 Try 3 FREE Designs
             <span className="arrow">→</span>
           </Link>

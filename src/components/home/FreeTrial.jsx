@@ -22,6 +22,7 @@ export default function FreeTrial() {
             to="/register"
             className="btn btn-primary"
             style={{ fontSize: '1.05rem', padding: '16px 40px' }}
+            onClick={() => localStorage.removeItem('activate')}
           >
             🎨 Get My Free Designs
             <span className="arrow">→</span>

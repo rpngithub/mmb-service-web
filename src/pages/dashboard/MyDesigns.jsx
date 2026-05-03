@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
 import { getUserDesigns } from '@/api/designService'
 
 const FREE_SAMPLES = [
@@ -9,6 +10,7 @@ const FREE_SAMPLES = [
 ]
 
 export default function MyDesigns() {
+  const { user, subscription, freeTrial } = useAuth()
   const [tab, setTab] = useState('free')
   const [designs, setDesigns] = useState([])
   const [preview, setPreview] = useState(null)
@@ -29,11 +31,45 @@ export default function MyDesigns() {
         </div>
       </div>
 
+      { subscription && (
+      <div id="subscription-designs">
+        <h2 className="db-section-heading">This month Designs</h2>
+        {designs.filter(d => d.subscription_id).length > 0 ? (
+        <div className="db-designs-grid">
+            {designs.filter(d => d.subscription_id).map((d) => (
+              <div key={d.id} className="db-design-card">
+                <div className="db-design-thumb">
+                  <img src={d.src} alt={d.name} />
+                  <div className="db-design-overlay">
+                    <button className="db-overlay-btn" onClick={() => setPreview(d)} aria-label="Preview">👁</button>
+                    <a className="db-overlay-btn download" href={d.src} download aria-label="Download">⬇</a>
+                  </div>
+                </div>
+                <div className="db-design-info">
+                  <span className="db-design-name">{d.name}</span>
+                  <span className="db-design-status ready">Ready</span>
+                </div>
+              </div>
+            ))}
+
+          </div>
+          ) : (
+            <div className="db-empty-state">
+              <div className="db-empty-icon">🎨</div>
+              <h3>We are working on it!</h3>
+              <p>Please check back later for new designs.</p>
+            </div>
+          )}
+      </div>
+      )}
+
+      {freeTrial && (
+      <React.Fragment>
       <div className="db-free-banner">
         <div className="db-free-banner-content">
           <span className="db-free-banner-icon">🎉</span>
           <div>
-            <strong>Your 3 FREE designs are ready!</strong>
+            <strong>{ designs.filter(d => !d.subscription_id).length > 0 ? `Your ${designs.filter(d => !d.subscription_id).length} FREE designs are ready!` : 'We are working on it!' }</strong>
             <p>Download them below and see the quality for yourself.</p>
           </div>
         </div>
@@ -48,11 +84,12 @@ export default function MyDesigns() {
           Monthly Designs
         </button>
       </div>
+      
 
       {tab === 'free' && (
-        <>
+        <React.Fragment>
           <div className="db-designs-grid">
-            {FREE_SAMPLES.map((d) => (
+            {designs.filter(d => !d.subscription_id).map((d) => (
               <div key={d.id} className="db-design-card">
                 <div className="db-design-thumb">
                   <img src={d.src} alt={d.name} />
@@ -78,7 +115,7 @@ export default function MyDesigns() {
               Upgrade Now →
             </button>
           </div>
-        </>
+        </React.Fragment>
       )}
 
       {tab === 'monthly' && (
@@ -110,6 +147,8 @@ export default function MyDesigns() {
             </button>
           </div>
         )
+      )}
+      </React.Fragment>
       )}
 
       {/* Preview Modal */}

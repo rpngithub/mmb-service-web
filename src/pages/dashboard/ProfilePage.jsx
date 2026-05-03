@@ -1,15 +1,36 @@
 import { useEffect } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '@/contexts/AuthContext'
 import { updateProfile } from '@/api/profileService'
-import { useState } from 'react'
+import ChipSelector from '@/components/ui/ChipSelector'
+import { getBusinesses } from '@/api/businessService'
+
+
+const OTHER_INDUSTRY_OPTIONS = [
+  { value: -1, label: '📌 Other' },
+]
 
 export default function ProfilePage() {
-  const { user } = useAuth()
+  const { user, business, subscription, freeTrial } = useAuth()
   const [toast, setToast] = useState('')
   const [saving, setSaving] = useState(false)
+  const [industry, setIndustry] = useState([business?.business_id || ''])
+  const [businesses, setBusinesses] = useState([]);
 
-  const { register, handleSubmit, reset } = useForm()
+  useEffect(() => {
+      // Fetch business options on component mount
+      getBusinesses()
+        .then(({ data }) => {
+          const options = data.map((b) => ({ value: b.id, label: b.name }))
+          options.push(...OTHER_INDUSTRY_OPTIONS)
+          setBusinesses(options)
+        })
+        .catch((err) => console.error('Failed to load business options:', err))
+    }, [])
+  
+
+  const { register, handleSubmit, reset, setFocus, setValue, formState: { errors } } = useForm()
 
   useEffect(() => {
     if (user) {
@@ -17,12 +38,12 @@ export default function ProfilePage() {
         name: user.name || '',
         email: user.email || '',
         mobile: user.mobile || '',
-        businessName: user.userBusiness?.brand_name || '',
-        industry: user.userBusiness?.design_preferences?.industry?.[0] || '',
-        website: user.userBusiness?.website || '',
+        businessName: business?.brand_name || '',
+        otherIndustry: business?.business_other || '',
+        website: business?.website || '',
       })
     }
-  }, [user, reset])
+  }, [user, business, reset])
 
   const showToast = (msg) => {
     setToast(msg)
@@ -37,6 +58,8 @@ export default function ProfilePage() {
         email: data.email,
         userBusiness: {
           brand_name: data.businessName,
+          business_id: industry[0] === -1 ? null : industry[0],
+          business_other: industry[0] === -1 ? data.otherIndustry : null,
           website: data.website,
         },
       })
@@ -50,6 +73,15 @@ export default function ProfilePage() {
 
   const userName = user?.name || 'User'
   const userInitial = userName.charAt(0).toUpperCase()
+
+  const handleIndustryChange = (selected) => {
+    setIndustry(selected)
+    if (selected[0] === -1) {
+      setFocus('otherIndustry')
+    } else {
+      setValue('otherIndustry', '')
+    }
+  }
 
   return (
     <div className="db-page active">
@@ -65,7 +97,7 @@ export default function ProfilePage() {
           <div className="db-profile-avatar">{userInitial}</div>
           <div>
             <h3>{userName}</h3>
-            <p>{user?.subscription?.plan?.name || 'Free Plan'} Member</p>
+            <p>{subscription ? subscription.plan_name : (freeTrial ? 'Free Plan' : 'Unsubscribed')} Member</p>
           </div>
         </div>
 
@@ -92,16 +124,25 @@ export default function ProfilePage() {
               <input id="profBusiness" type="text" placeholder="Your business name" {...register('businessName')} />
             </div>
           </div>
-          <div className="db-form-row">
-            <div className="db-form-group">
-              <label htmlFor="profIndustry">Industry</label>
-              <input id="profIndustry" type="text" placeholder="e.g. Fashion, Fitness" {...register('industry')} />
-            </div>
-            <div className="db-form-group">
-              <label htmlFor="profWebsite">Website</label>
-              <input id="profWebsite" type="url" placeholder="https://yourbrand.com" {...register('website')} />
-            </div>
-          </div>
+          <div className="db-form-group">
+                <label>Industry</label>
+                <ChipSelector options={businesses} mode="single" value={industry} onChange={handleIndustryChange} />
+                {industry[0] === -1 && (
+                  <input
+                    type="text"
+                    placeholder="Please specify your industry"
+                    style={{ marginTop: '8px' }}
+                    {...register('otherIndustry')}
+                  />
+                )}
+                
+              </div>
+              <div className="db-form-row"> </div>
+              <div className="db-form-group">
+                <label htmlFor="profWebsite">Website</label>
+                <input id="profWebsite" type="url" placeholder="https://yourbrand.com" {...register('website')} />
+              </div>
+
           <button type="submit" className="db-save-btn" disabled={saving}>
             {saving ? 'Saving...' : 'Save Changes'}
           </button>

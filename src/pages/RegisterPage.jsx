@@ -1,10 +1,13 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '@/contexts/AuthContext'
 import { useOtpTimer } from '@/hooks/useOtpTimer'
 import { signupStep1, signupStep2 } from '@/api/authService'
 import { updateProfile } from '@/api/profileService'
+import { activateFreeTrial, createCheckout, verifyPayment } from '@/api/subscriptionService'
+import { openRazorpayCheckout } from '@/utils/razorpay'
+import { getBusinesses } from '@/api/businessService'
 import ChipSelector from '@/components/ui/ChipSelector'
 import StyleCardSelector from '@/components/ui/StyleCardSelector'
 import OtpInput from '@/components/ui/OtpInput'
@@ -14,17 +17,20 @@ import '@/styles/register.css'
 
 const TOTAL_STEPS = 4
 
-const INDUSTRY_OPTIONS = [
-  { value: 'Cafe / Restaurant', label: '☕ Cafe / Restaurant' },
-  { value: 'Real Estate', label: '🏠 Real Estate' },
-  { value: 'Fashion', label: '👗 Fashion' },
-  { value: 'Beauty', label: '💄 Beauty' },
-  { value: 'Fitness', label: '💪 Fitness' },
-  { value: 'Education', label: '📚 Education' },
-  { value: 'Healthcare', label: '🏥 Healthcare' },
-  { value: 'E-commerce', label: '🛒 E-commerce' },
-  { value: 'Personal Brand', label: '👤 Personal Brand' },
-  { value: 'Other', label: '📌 Other' },
+// const INDUSTRY_OPTIONS = [
+//   { value: 'Cafe / Restaurant', label: '☕ Cafe / Restaurant' },
+//   { value: 'Real Estate', label: '🏠 Real Estate' },
+//   { value: 'Fashion', label: '👗 Fashion' },
+//   { value: 'Beauty', label: '💄 Beauty' },
+//   { value: 'Fitness', label: '💪 Fitness' },
+//   { value: 'Education', label: '📚 Education' },
+//   { value: 'Healthcare', label: '🏥 Healthcare' },
+//   { value: 'E-commerce', label: '🛒 E-commerce' },
+//   { value: 'Personal Brand', label: '👤 Personal Brand' },
+//   { value: 'Other', label: '📌 Other' },
+// ]
+const OTHER_INDUSTRY_OPTIONS = [
+  { value: -1, label: '📌 Other' },
 ]
 
 const POST_TYPE_OPTIONS = [
@@ -45,9 +51,9 @@ const TONE_OPTIONS = [
 ]
 
 const BRANDING_OPTIONS = [
-  { value: 'Full branding ready', label: 'Full branding ready' },
-  { value: 'Only logo', label: 'Only logo' },
-  { value: 'Need help', label: 'Need help' },
+  { value: 'READY', label: 'Full branding ready' },
+  { value: 'ONLY_LOGO', label: 'Only logo' },
+  { value: 'NEED_HELP', label: 'Need help' },
 ]
 
 export default function RegisterPage() {
@@ -58,6 +64,7 @@ export default function RegisterPage() {
   const [txnData, setTxnData] = useState({ user_id: '', transaction_id: '' })
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState('')
+  const [businesses, setBusinesses] = useState([]);
 
   // Step 2–4 local state
   const [industry, setIndustry] = useState([])
@@ -70,12 +77,23 @@ export default function RegisterPage() {
   const [files, setFiles] = useState([])
 
   const fileInputRef = useRef(null)
-  const { login } = useAuth()
+  const { login, user } = useAuth()
   const navigate = useNavigate()
   const { remaining, canResend, start: startTimer } = useOtpTimer(30)
 
-  const { register, handleSubmit, getValues, trigger, formState: { errors } } = useForm({
-    defaultValues: { name: '', email: '', mobile: '', businessName: '', businessDesc: '', websiteUrl: '' },
+    useEffect(() => {
+    // Fetch business options on component mount
+    getBusinesses()
+      .then(({ data }) => {
+        const options = data.map((b) => ({ value: b.id, label: b.name }))
+        options.push(...OTHER_INDUSTRY_OPTIONS)
+        setBusinesses(options)
+      })
+      .catch((err) => console.error('Failed to load business options:', err))
+  }, [])
+
+  const { register, handleSubmit, getValues, trigger, setValue, setFocus, formState: { errors } } = useForm({
+    defaultValues: { name: '', email: '', mobile: '', businessName: '', businessDesc: '', websiteUrl: '', otherIndustry: '' },
   })
 
   const progress = (step / TOTAL_STEPS) * 100
@@ -92,7 +110,7 @@ export default function RegisterPage() {
       setOtpSent(true)
       startTimer()
     } catch (err) {
-      setApiError(err.response?.data?.message || 'Failed to send OTP. Please try again.')
+      setApiError(err.response?.data?.error || 'Failed to send OTP. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -104,41 +122,84 @@ export default function RegisterPage() {
     setOtpError('')
     try {
       const { data } = await signupStep2({ ...txnData, otp })
-      login(data.accessToken, data.user)
+      login(data.accessToken, null)
       setStep(2)
     } catch (err) {
-      setOtpError(err.response?.data?.message || 'Invalid OTP. Please try again.')
+      setOtpError(err.response?.data?.error || 'Invalid OTP. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
   const submitAll = async () => {
-    const { businessName, businessDesc, websiteUrl } = getValues()
+    const { businessName, businessDesc, websiteUrl, otherIndustry } = getValues()
     setLoading(true)
     setApiError('')
+    // add logic to handle max files
+    if (files.length > 5) {
+      setApiError('You can upload a maximum of 5 files.')
+      setLoading(false)
+      return
+    }
+
     try {
       await updateProfile({
         userBusiness: {
+          business_id: industry[0] || -1,
+          business_other: industry[0] === -1 ? otherIndustry : '',
           brand_name: businessName,
           description: businessDesc,
           website: websiteUrl,
-          delivery_preference: delivery,
-          branding_status: branding[0] || '',
           design_preferences: {
             postType: postTypes,
             designStyle: designStyles,
             contentTone: tones,
-            industry: industry,
-            referenceLinks: refLinks,
           },
+          referenceLinks: refLinks,
+          delivery_preference: delivery,
+          branding_status: branding[0] || '',
         },
-      })
-      setStep(5)
+      }, files)
+
+      const activateData = localStorage.getItem('activate')
+      if (activateData) {
+        const plan = JSON.parse(activateData)
+        const { data: order } = await createCheckout(plan.id)
+        await openRazorpayCheckout({
+          order,
+          user,
+          onSuccess: async (paymentData) => {
+            try {
+              await verifyPayment(paymentData)
+              localStorage.removeItem('activate')
+              setStep(5)
+            } catch {
+              setApiError('Payment verified but subscription activation failed. Contact support.')
+            }
+          },
+          onError: (err) => {
+            if (err.message !== 'Payment cancelled') {
+              setApiError('Payment failed. Please try again.')
+            }
+          },
+        })
+      } else {
+        await activateFreeTrial()
+        setStep(5)
+      }
     } catch (err) {
-      setApiError(err.response?.data?.message || 'Failed to save details. Please try again.')
+      setApiError(err.response?.data?.error || 'Failed to save details. Please try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleIndustryChange = (selected) => {
+    setIndustry(selected)
+    if (selected[0] === -1) {
+      setFocus('otherIndustry')
+    } else {
+      setValue('otherIndustry', '')
     }
   }
 
@@ -276,7 +337,16 @@ export default function RegisterPage() {
               </div>
               <div className="reg-form-group">
                 <label>Industry</label>
-                <ChipSelector options={INDUSTRY_OPTIONS} mode="single" value={industry} onChange={setIndustry} />
+                <ChipSelector options={businesses} mode="single" value={industry} onChange={handleIndustryChange} />
+                {industry[0] === -1 && (
+                  <input
+                    type="text"
+                    placeholder="Please specify your industry"
+                    style={{ marginTop: '8px' }}
+                    {...register('otherIndustry')}
+                  />
+                )}
+                {errors.otherIndustry && <span className="field-error">{errors.otherIndustry.message}</span>}
               </div>
 
               <div className="reg-btn-row">
@@ -347,14 +417,20 @@ export default function RegisterPage() {
               </div>
 
               <div className="reg-form-group">
-                <label>Upload Assets</label>
+                <label>Upload Assets </label>
+                <p className="help-text">Maximum 5 files. Accepted formats: images, PDF, AI, PSD.</p>
                 <div
                   className="upload-zone"
                   onClick={() => fileInputRef.current?.click()}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => {
                     e.preventDefault()
-                    setFiles((prev) => [...prev, ...Array.from(e.dataTransfer.files)])
+                    const droppedFiles = Array.from(e.dataTransfer.files)
+                    if (files.length + droppedFiles.length > 5) {
+                      setApiError('You can upload a maximum of 5 files.')
+                      return
+                    }
+                    setFiles((prev) => [...prev, ...droppedFiles])
                   }}
                 >
                   <div className="upload-icon">📁</div>
@@ -366,7 +442,14 @@ export default function RegisterPage() {
                     multiple
                     accept="image/*,.pdf,.ai,.psd"
                     hidden
-                    onChange={(e) => setFiles((prev) => [...prev, ...Array.from(e.target.files)])}
+                    onChange={(e) => {
+                      const selectedFiles = Array.from(e.target.files)
+                      if (files.length + selectedFiles.length > 5) {
+                        setApiError('You can upload a maximum of 5 files.')
+                        return
+                      }
+                      setFiles((prev) => [...prev, ...selectedFiles])
+                    }}
                   />
                 </div>
                 {files.length > 0 && (
@@ -384,7 +467,7 @@ export default function RegisterPage() {
               <div className="reg-form-group">
                 <label>Delivery Preference</label>
                 <div className="radio-group row">
-                  {['WhatsApp', 'Email'].map((opt) => (
+                  {['Whatsapp', 'Email'].map((opt) => (
                     <label key={opt} className="radio-item">
                       <input
                         type="radio"

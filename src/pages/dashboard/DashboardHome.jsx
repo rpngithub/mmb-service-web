@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function DashboardHome() {
-  const { user } = useAuth()
+  const { user, subscription, freeTrial } = useAuth()
   const navigate = useNavigate()
   const firstName = user?.name?.split(' ')[0] || 'there'
 
@@ -45,7 +45,7 @@ export default function DashboardHome() {
           <div className="db-card-icon">💎</div>
           <div className="db-card-body">
             <span className="db-card-label">Current Plan</span>
-            <span className="db-card-value">Free</span>
+            <span className="db-card-value">{subscription?.plan_name || 'Free Plan'}</span>
             <button className="db-action-btn primary" onClick={() => navigate('/dashboard/plans')}>
               Upgrade Now →
             </button>

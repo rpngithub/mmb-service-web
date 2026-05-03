@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useScrollReveal } from '@/hooks/useScrollReveal'
 import { getPlans } from '@/api/planService'
 
@@ -48,9 +48,9 @@ const FALLBACK_PLANS = [
   },
 ]
 
-function PlanCard({ plan, stagger }) {
+function PlanCard({ plan, stagger, onSelect }) {
   return (
-    <div className={`pricing-card${plan.popular ? ' popular' : ''} reveal stagger-${stagger}`}>
+    <div className={`pricing-card${plan.popular ? ' popular' : ''} reveal stagger-${stagger}`} id={`plan${plan.name}`}>
       {plan.popular && <div className="popular-badge">⭐ Most Popular</div>}
       <div className="pricing-plan-name">{plan.emoji} {plan.name}</div>
       <div className="pricing-price">
@@ -63,31 +63,39 @@ function PlanCard({ plan, stagger }) {
           <li key={i}><span className="check">✓</span> {f}</li>
         ))}
       </ul>
-      <Link to="/register" className={`btn ${plan.btnClass}`}>{plan.cta}</Link>
+      <button className={`btn ${plan.btnClass}`} onClick={() => onSelect(plan)}>{plan.cta}</button>
     </div>
   )
 }
 
 export default function PricingSection() {
   const [plans, setPlans] = useState(FALLBACK_PLANS)
-  const ref = useScrollReveal()
+  const ref = useScrollReveal({}, [plans]) // re-run reveal when plans change
+  const navigate = useNavigate()
+
+  function handlePlanSelect(plan) {
+    localStorage.setItem('activate', JSON.stringify(plan))
+    navigate('/register')
+  }
 
   useEffect(() => {
     getPlans()
       .then(({ data }) => {
         if (Array.isArray(data) && data.length > 0) {
+          data.sort((a, b) => a.price - b.price) // sort by price ascending
           const mapped = data.map((p, i) => ({
             id: p.id,
             emoji: ['🟢', '🔵', '🟣'][i] || '⚪',
             name: p.name,
-            originalPrice: null,
-            price: `₹${p.price}`,
+            originalPrice: p.original_price ? `₹${p.original_price}`.replace('.00', '') : '', // handle missing originalPrice
+            price: `₹${p.price}`.replace('.00', ''), // need to replace .00 with ₹ and remove decimals
             desc: p.description || '',
             features: Object.entries(p.features || {}).map(([k, v]) => `${v} ${k}`),
             cta: i === 1 ? 'Get Started' : 'Start Now',
             btnClass: i === 1 ? 'btn-primary' : 'btn-outline-red',
-            popular: i === 1,
+            popular: p.popular || false,
           }))
+          
           setPlans(mapped)
         }
       })
@@ -106,7 +114,7 @@ export default function PricingSection() {
 
         <div className="pricing-grid">
           {plans.map((plan, i) => (
-            <PlanCard key={plan.id} plan={plan} stagger={i + 1} />
+            <PlanCard key={plan.id} plan={plan} stagger={i + 1} onSelect={handlePlanSelect} />
           ))}
         </div>
 
