@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useOtpTimer } from '@/hooks/useOtpTimer'
 import { updateMobileStep1, updateMobileStep2 } from '@/api/profileService'
+import { set } from 'react-hook-form'
 
 export default function SettingsPage() {
   const { user, logout } = useAuth()
@@ -24,6 +25,7 @@ export default function SettingsPage() {
     try {
       const { data } = await updateMobileStep1({ mobile: newMobile })
       setTxnId(data.transaction_id)
+      setOtp(data.otp) // For testing purposes, remove in production
       setOtpSent(true)
       startTimer()
       showToast('OTP sent to your new number')

@@ -9,6 +9,7 @@ import OtpInput from '@/components/ui/OtpInput'
 import WhatsAppFAB from '@/components/common/WhatsAppFAB'
 import '@/styles/register.css'
 import '@/styles/signin.css'
+import { set } from 'react-hook-form'
 
 export default function SigninPage() {
   const [step, setStep] = useState(1)
@@ -47,6 +48,7 @@ export default function SigninPage() {
     try {
       const { data } = await signinMobileStep1({ mobile })
       setTxnId(data.transaction_id)
+      setOtp(data.otp) //  For testing purposes, remove in production
       setStep(2)
       startTimer()
     } catch (err) {
@@ -80,6 +82,7 @@ export default function SigninPage() {
     try {
       const { data } = await signinMobileStep1({ mobile })
       setTxnId(data.transaction_id)
+      setOtp(data.otp) // For testing purposes, remove in production
       startTimer()
       showToast('OTP sent!')
     } catch {

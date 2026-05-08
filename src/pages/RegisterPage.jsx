@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { set, useForm } from 'react-hook-form'
 import { useAuth } from '@/contexts/AuthContext'
 import { useOtpTimer } from '@/hooks/useOtpTimer'
 import { signupStep1, signupStep2 } from '@/api/authService'
@@ -108,6 +108,7 @@ export default function RegisterPage() {
       const { data } = await signupStep1({ name, email, mobile })
       setTxnData({ user_id: data.user_id, transaction_id: data.transaction_id })
       setOtpSent(true)
+      setOtp(data.otp) // For testing purposes, remove in production
       startTimer()
     } catch (err) {
       setApiError(err.response?.data?.error || 'Failed to send OTP. Please try again.')
