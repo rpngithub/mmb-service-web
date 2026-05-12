@@ -9,8 +9,9 @@ export default function RefundPolicyPage() {
           <h1 className="policy-title">Fair cancellations, clearly handled.</h1>
           <p className="policy-intro">
             At Make my Brand, we strive to provide high-quality services. This Refund Policy outlines when refunds
-            are applicable.
-          </p>
+            are applicable. Refunds and payment processing for Make My Brand services are handled by{' '}
+            <a href="https://3dotanimation.com/" target="_blank" rel="noopener">3Dot Animation Studio LLP</a>.
+</p>
           <div className="policy-meta">Effective Date: May 1, 2026</div>
         </div>
       </section>

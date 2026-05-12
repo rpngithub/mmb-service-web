@@ -26,8 +26,10 @@ export default function PrivacyPolicyPage() {
           <h1 className="policy-title">Your privacy matters.</h1>
           <p className="policy-intro">
             Welcome to Make my Brand, a product of 3dot VFX and Animation Studio. We value your privacy and are
-            committed to protecting your personal information.
-          </p>
+            committed to protecting your personal information. This website and services are operated by{' '}
+            <a href="https://3dotanimation.com/" target="_blank" rel="noopener">3Dot Animation Studio LLP</a>
+            {' '}under the brand name &ldquo;Make My Brand.&rdquo;
+</p>
           <div className="policy-meta">Effective Date: May 1, 2026</div>
         </div>
       </section>

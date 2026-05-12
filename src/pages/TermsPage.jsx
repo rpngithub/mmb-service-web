@@ -10,8 +10,12 @@ export default function TermsPage() {
           <h1 className="policy-title">Clear terms for better work.</h1>
           <p className="policy-intro">
             Welcome to Make my Brand, operated by 3dot VFX and Animation Studio. By accessing or using our services,
-            you agree to the following terms.
-          </p>
+            you agree to the following terms. These Terms and Conditions govern the use of services provided under the
+            brand &ldquo;Make My Brand,&rdquo; operated by{' '}
+            <a href="https://3dotanimation.com/" target="_blank" rel="noopener">3Dot Animation Studio LLP</a>.
+            {' '}All payments and transactions are processed under the legal entity name{' '}
+            <a href="https://3dotanimation.com/" target="_blank" rel="noopener">3Dot Animation Studio LLP</a>.
+</p>
           <div className="policy-meta">Effective Date: May 1, 2026</div>
         </div>
       </section>
