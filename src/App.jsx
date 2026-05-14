@@ -8,6 +8,8 @@ import ProtectedRoute from '@/components/common/ProtectedRoute'
 
 import HomePage from '@/pages/HomePage'
 import RegisterPage from '@/pages/RegisterPage'
+import CheckoutPage from '@/pages/CheckoutPage'
+import PaymentSuccessPage from '@/pages/PaymentSuccessPage'
 import SigninPage from '@/pages/SigninPage'
 import ContactPage from '@/pages/ContactPage'
 import AboutUsPage from '@/pages/AboutUsPage'
@@ -49,6 +51,8 @@ export default function App() {
 
       {/* Standalone pages with their own layout (no main nav/footer) */}
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/checkout" element={<CheckoutPage />} />
+      <Route path="/payment-success" element={<PaymentSuccessPage />} />
       <Route path="/signin" element={<SigninPage />} />
 
       <Route

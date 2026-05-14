@@ -5,8 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useOtpTimer } from '@/hooks/useOtpTimer'
 import { signupStep1, signupStep2 } from '@/api/authService'
 import { updateProfile } from '@/api/profileService'
-import { activateFreeTrial, createCheckout, verifyPayment } from '@/api/subscriptionService'
-import { openRazorpayCheckout } from '@/utils/razorpay'
+import { activateFreeTrial } from '@/api/subscriptionService'
 import { getBusinesses } from '@/api/businessService'
 import ChipSelector from '@/components/ui/ChipSelector'
 import StyleCardSelector from '@/components/ui/StyleCardSelector'
@@ -77,7 +76,7 @@ export default function RegisterPage() {
   const [files, setFiles] = useState([])
 
   const fileInputRef = useRef(null)
-  const { login, user } = useAuth()
+  const { login, user, setUserProfile } = useAuth()
   const navigate = useNavigate()
   const { remaining, canResend, start: startTimer } = useOtpTimer(30)
 
@@ -144,7 +143,7 @@ export default function RegisterPage() {
     }
 
     try {
-      await updateProfile({
+      const {data: profileData } = await updateProfile({
         userBusiness: {
           business_id: industry[0] || -1,
           business_other: industry[0] === -1 ? otherIndustry : '',
@@ -160,33 +159,15 @@ export default function RegisterPage() {
           delivery_preference: delivery,
           branding_status: branding[0] || '',
         },
-      }, files)
+      }, files);
+      setUserProfile(profileData) // Update user context with new profile data
 
       const activateData = localStorage.getItem('activate')
       if (activateData) {
-        const plan = JSON.parse(activateData)
-        const { data: order } = await createCheckout(plan.id)
-        await openRazorpayCheckout({
-          order,
-          user,
-          onSuccess: async (paymentData) => {
-            try {
-              await verifyPayment(paymentData)
-              localStorage.removeItem('activate')
-              setStep(5)
-            } catch {
-              setApiError('Payment verified but subscription activation failed. Contact support.')
-            }
-          },
-          onError: (err) => {
-            if (err.message !== 'Payment cancelled') {
-              setApiError('Payment failed. Please try again.')
-            }
-          },
-        })
+        navigate('/checkout')
       } else {
         await activateFreeTrial()
-        setStep(5)
+        navigate('/payment-success')
       }
     } catch (err) {
       setApiError(err.response?.data?.error || 'Failed to save details. Please try again.')
@@ -203,9 +184,6 @@ export default function RegisterPage() {
       setValue('otherIndustry', '')
     }
   }
-
-  const waNumber = import.meta.env.VITE_WA_NUMBER || '916380271857'
-  const waLink = `https://wa.me/${waNumber}?text=Hi%2C%20I%27ve%20registered%20on%20MMB%20and%20I%27m%20excited%20to%20receive%20my%20free%20designs!`
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-light)', display: 'flex', flexDirection: 'column' }}>
@@ -495,28 +473,6 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* ===== STEP 5: Success ===== */}
-          {step === 5 && (
-            <div className="reg-step active">
-              <div className="success-screen">
-                <div className="success-icon">🎉</div>
-                <h2>You're all set!</h2>
-                <p>
-                  We're working on your <strong>3 FREE designs</strong>.<br />
-                  You'll receive them within <strong>48 hours</strong>.
-                </p>
-                <a href={waLink} target="_blank" rel="noopener" className="reg-btn primary whatsapp-btn">
-                  💬 Continue on WhatsApp
-                </a>
-                <p className="reg-micro" style={{ marginTop: '12px' }}>
-                  Need immediate help? Message us directly on WhatsApp.
-                </p>
-                <Link to="/" className="reg-btn secondary" style={{ marginTop: '12px' }}>
-                  Go to Home
-                </Link>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 

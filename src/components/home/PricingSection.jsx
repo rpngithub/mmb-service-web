@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useScrollReveal } from '@/hooks/useScrollReveal'
 import { getPlans } from '@/api/planService'
+import { useAuth } from '@/contexts/AuthContext'
 
 const FALLBACK_PLANS = [
   {
@@ -69,13 +70,14 @@ function PlanCard({ plan, stagger, onSelect }) {
 }
 
 export default function PricingSection() {
+  const { user, subscription } = useAuth()
   const [plans, setPlans] = useState(FALLBACK_PLANS)
   const ref = useScrollReveal({}, [plans]) // re-run reveal when plans change
   const navigate = useNavigate()
 
   function handlePlanSelect(plan) {
     localStorage.setItem('activate', JSON.stringify(plan))
-    navigate('/register')
+    user ? navigate('/checkout') : navigate('/register')
   }
 
   useEffect(() => {
@@ -90,7 +92,7 @@ export default function PricingSection() {
             originalPrice: p.original_price ? `₹${p.original_price}`.replace('.00', '') : '', // handle missing originalPrice
             price: `₹${p.price}`.replace('.00', ''), // need to replace .00 with ₹ and remove decimals
             desc: p.description || '',
-            features: Object.entries(p.features || {}).map(([k, v]) => `${v} ${k}`),
+            features: Object.entries(p.features || {}).map(([k, v]) => `${v}`),
             cta: i === 1 ? 'Get Started' : 'Start Now',
             btnClass: i === 1 ? 'btn-primary' : 'btn-outline-red',
             popular: p.popular || false,

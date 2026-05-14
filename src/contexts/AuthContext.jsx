@@ -35,14 +35,21 @@ export function AuthProvider({ children }) {
     try {
       setLoading(true)
       const { data } = await getProfile()
-      setUser(data.user)
-      setSubscription(data.subscription)
-      setBusiness(data.userBusiness)
+      // setUser(data.user)
+      // setSubscription(data.subscription)
+      // setBusiness(data.userBusiness)
+      setUserProfile(data);
     } catch (err) {
       console.error('Failed to fetch user profile:', err)
     } finally {
       setLoading(false)
     }
+  }
+
+  const setUserProfile = (userData) => {
+    userData.user ? setUser(userData.user) : setUser(user)
+    userData.subscription ? setSubscription(userData.subscription) : setSubscription(subscription)
+    userData.userBusiness ? setBusiness(userData.userBusiness) : setBusiness(business)
   }
   
   const login = (token, userData = null) => {
@@ -70,7 +77,7 @@ export function AuthProvider({ children }) {
   console.log('AuthContext state:', { user, subscription, business, freeTrial, loading, isAuthenticated })
 
   return (
-    <AuthContext.Provider value={{ user, subscription, business, freeTrial, loading, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, subscription, business, freeTrial, loading, isAuthenticated, login, logout, setUserProfile }}>
       {children}
     </AuthContext.Provider>
   )

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { getPlans } from '@/api/planService'
 import { createCheckout, verifyPayment } from '@/api/subscriptionService'
@@ -26,6 +27,7 @@ const FALLBACK_PLANS = [
 ]
 
 export default function PlansAndBilling() {
+  const navigate = useNavigate()
   const { user, subscription, freeTrial } = useAuth()
   const [plans, setPlans] = useState(FALLBACK_PLANS)
   const [loading, setLoading] = useState(null)
@@ -61,29 +63,31 @@ export default function PlansAndBilling() {
   }
 
   const handleBuy = async (plan) => {
-    setLoading(plan.id)
-    try {
-      const { data: order } = await createCheckout(plan.id)
-      await openRazorpayCheckout({
-        order,
-        user,
-        onSuccess: async (paymentData) => {
-          try {
-            await verifyPayment(paymentData)
-            showToast('🎉 Payment successful! Your subscription is now active.')
-          } catch {
-            showToast('Payment verified but subscription activation failed. Contact support.')
-          }
-        },
-        onError: (err) => {
-          if (err.message !== 'Payment cancelled') showToast('Payment failed. Please try again.')
-        },
-      })
-    } catch (err) {
-      showToast(err.response?.data?.message || 'Failed to initiate checkout. Please try again.')
-    } finally {
-      setLoading(null)
-    }
+    localStorage.setItem('activate', JSON.stringify(plan))
+    navigate('/checkout')
+    // setLoading(plan.id)
+    // try {
+    //   const { data: order } = await createCheckout(plan.id)
+    //   await openRazorpayCheckout({
+    //     order,
+    //     user,
+    //     onSuccess: async (paymentData) => {
+    //       try {
+    //         await verifyPayment(paymentData)
+    //         showToast('🎉 Payment successful! Your subscription is now active.')
+    //       } catch {
+    //         showToast('Payment verified but subscription activation failed. Contact support.')
+    //       }
+    //     },
+    //     onError: (err) => {
+    //       if (err.message !== 'Payment cancelled') showToast('Payment failed. Please try again.')
+    //     },
+    //   })
+    // } catch (err) {
+    //   showToast(err.response?.data?.message || 'Failed to initiate checkout. Please try again.')
+    // } finally {
+    //   setLoading(null)
+    // }
   }
 
   return (
