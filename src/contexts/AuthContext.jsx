@@ -50,6 +50,7 @@ export function AuthProvider({ children }) {
     userData.user ? setUser(userData.user) : setUser(user)
     userData.subscription ? setSubscription(userData.subscription) : setSubscription(subscription)
     userData.userBusiness ? setBusiness(userData.userBusiness) : setBusiness(business)
+    userData.freeTrial ? setFreeTrial(userData.freeTrial) : setFreeTrial(freeTrial)
   }
   
   const login = (token, userData = null) => {
@@ -58,6 +59,7 @@ export function AuthProvider({ children }) {
       setUser(userData.user)
       setSubscription(userData.subscription)
       setBusiness(userData.userBusiness)
+      setFreeTrial(userData.freeTrial)
       setLoading(false);
     } else {
       getUserProfile()

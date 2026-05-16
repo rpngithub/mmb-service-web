@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import { useScrollReveal } from '@/hooks/useScrollReveal'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function ProblemSolution() {
   const ref = useScrollReveal()
+  const { isAuthenticated, subscription, freeTrial } = useAuth()
 
   return (
     <section className="problem-section" id="problem" ref={ref}>
@@ -37,10 +39,12 @@ export default function ProblemSolution() {
               We handle your social media creatives, from posts to reels, so you can focus on growing your business.
               Professional designs, consistent branding, delivered monthly.
             </p>
-            <Link to="/register" className="btn btn-primary" onClick={() => localStorage.removeItem('activate')}>
-              Get 3 Free Designs
-              <span className="arrow">→</span>
-            </Link>
+            {!(isAuthenticated && (subscription || freeTrial)) && (
+              <Link to="/register" className="btn btn-primary" onClick={() => localStorage.removeItem('activate')}>
+                Get 3 Free Designs
+                <span className="arrow">→</span>
+              </Link>
+            )}
           </div>
         </div>
       </div>

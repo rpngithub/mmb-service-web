@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useCounterAnimation } from '@/hooks/useCounterAnimation'
+import { useAuth } from '@/contexts/AuthContext'
 
 const heroIcons = [
   { cls: 'w-fb',    src: '/images/hero-icons/fb.png',    alt: 'FB',    speed: 0.2   },
@@ -17,6 +18,7 @@ const heroIcons = [
 ]
 
 export default function HeroSection() {
+  const { isAuthenticated, subscription, freeTrial } = useAuth()
   const iconsRef = useRef(null)
   const count50 = useCounterAnimation(50)
   const count1200 = useCounterAnimation(1200)
@@ -72,10 +74,12 @@ export default function HeroSection() {
           Monthly social media creatives and reels designed for your brand—delivered ready to post, without the stress.
         </p>
         <div className="hero-ctas">
-          <Link to="/register" className="btn btn-primary" onClick={() => localStorage.removeItem('activate')}>
-            🎨 Try 3 FREE Designs
-            <span className="arrow">→</span>
-          </Link>
+          {!(isAuthenticated && (subscription || freeTrial)) && (
+            <Link to="/register" className="btn btn-primary" onClick={() => localStorage.removeItem('activate')}>
+              🎨 Try 3 FREE Designs
+              <span className="arrow">→</span>
+            </Link>
+          )}
           <a href="#pricing" className="btn btn-secondary" onClick={(e) => {
             e.preventDefault()
             document.querySelector('#pricing')?.scrollIntoView({ behavior: 'smooth' })
