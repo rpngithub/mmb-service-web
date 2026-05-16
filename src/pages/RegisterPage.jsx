@@ -70,10 +70,11 @@ export default function RegisterPage() {
   const [postTypes, setPostTypes] = useState([])
   const [designStyles, setDesignStyles] = useState([])
   const [tones, setTones] = useState([])
-  const [branding, setBranding] = useState([])
+  const [branding, setBranding] = useState(['NEED_HELP'])
   const [refLinks, setRefLinks] = useState([])
-  const [delivery, setDelivery] = useState('WhatsApp')
+  const [delivery, setDelivery] = useState('Whatsapp')
   const [files, setFiles] = useState([])
+  const [industryError, setIndustryError] = useState('')
 
   const fileInputRef = useRef(null)
   const { login, user, setUserProfile } = useAuth()
@@ -166,7 +167,8 @@ export default function RegisterPage() {
       if (activateData) {
         navigate('/checkout')
       } else {
-        await activateFreeTrial()
+        let { data: activateFreeTrialData } = await activateFreeTrial();
+        setUserProfile({freeTrial: activateFreeTrialData}) // Update free trial status in context
         navigate('/payment-success')
       }
     } catch (err) {
@@ -176,8 +178,17 @@ export default function RegisterPage() {
     }
   }
 
+  const handleStep2Next = async () => {
+    const fieldsValid = await trigger(['businessName', 'otherIndustry'])
+    const hasIndustry = industry.length > 0
+    if (!hasIndustry) setIndustryError('Please select an industry')
+    else setIndustryError('')
+    if (fieldsValid && hasIndustry) setStep(3)
+  }
+
   const handleIndustryChange = (selected) => {
     setIndustry(selected)
+    if (selected.length > 0) setIndustryError('')
     if (selected[0] === -1) {
       setFocus('otherIndustry')
     } else {
@@ -299,12 +310,12 @@ export default function RegisterPage() {
                 <div className="header-content">
                   <h2>Tell us about your business</h2>
                 </div>
-                <a href="#" className="skip-link" onClick={(e) => { e.preventDefault(); setStep(3) }}>Skip →</a>
               </div>
 
               <div className="reg-form-group">
-                <label htmlFor="businessName">Business Name</label>
-                <input id="businessName" type="text" placeholder="Bloom Boutique" {...register('businessName')} />
+                <label htmlFor="businessName">Business Name <span className="req">*</span></label>
+                <input id="businessName" type="text" placeholder="Bloom Boutique" {...register('businessName', { required: 'Business name is required' })} />
+                {errors.businessName && <span className="field-error">{errors.businessName.message}</span>}
               </div>
               <div className="reg-form-group">
                 <label htmlFor="businessDesc">What does your business do?</label>
@@ -315,14 +326,17 @@ export default function RegisterPage() {
                 <input id="websiteUrl" type="url" placeholder="https://yourbrand.com" {...register('websiteUrl')} />
               </div>
               <div className="reg-form-group">
-                <label>Industry</label>
+                <label>Industry <span className="req">*</span></label>
                 <ChipSelector options={businesses} mode="single" value={industry} onChange={handleIndustryChange} />
+                {industryError && <span className="field-error">{industryError}</span>}
                 {industry[0] === -1 && (
                   <input
                     type="text"
                     placeholder="Please specify your industry"
                     style={{ marginTop: '8px' }}
-                    {...register('otherIndustry')}
+                    {...register('otherIndustry', {
+                      validate: (val) => industry[0] !== -1 || !!val.trim() || 'Please specify your industry',
+                    })}
                   />
                 )}
                 {errors.otherIndustry && <span className="field-error">{errors.otherIndustry.message}</span>}
@@ -330,7 +344,7 @@ export default function RegisterPage() {
 
               <div className="reg-btn-row">
                 <button className="reg-btn secondary" onClick={() => setStep(1)}>← Back</button>
-                <button className="reg-btn primary" onClick={() => setStep(3)}>Next →</button>
+                <button className="reg-btn primary" onClick={handleStep2Next}>Next →</button>
               </div>
             </div>
           )}

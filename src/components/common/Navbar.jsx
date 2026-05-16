@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated, user, subscription, freeTrial } = useAuth()
   const location = useLocation()
   const isHome = location.pathname === '/'
 
@@ -44,7 +44,9 @@ export default function Navbar() {
             ) : (
               <Link to="/signin" className="nav-signin">Sign In</Link>
             )}
-            <Link to="/register" className="btn btn-primary nav-cta" onClick={() => localStorage.removeItem('activate')}>Free Designs</Link>
+            {!(isAuthenticated && (subscription || freeTrial)) && (
+              <Link to="/register" className="btn btn-primary nav-cta" onClick={() => localStorage.removeItem('activate')}>Free Designs</Link>
+            )}
           </div>
           <div
             className={`hamburger${menuOpen ? ' active' : ''}`}
