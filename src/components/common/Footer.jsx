@@ -1,19 +1,17 @@
-import { Link } from 'react-router-dom'
-
 export default function Footer() {
   return (
     <footer className="footer" id="footer">
       <div className="container">
         <div className="footer-grid">
           <div className="footer-brand">
-            <Link to="/" className="nav-logo">
+            <a href="/" className="nav-logo">
               <img src="/images/mmb-logo-white.svg" alt="MMB" className="nav-logo-img" />
-            </Link>
+            </a>
             <p>Monthly social media creatives and reels designed for your brand—delivered ready to post.</p>
           </div>
           <div className="footer-col">
             <h4>Company</h4>
-            <Link to="/about-us">About Us</Link>
+            <a href="/about-us">About Us</a>
             <a href="/#features">Services</a>
             <a href="/#pricing">Pricing</a>
             <a href="/#samples">Our Work</a>
@@ -22,16 +20,16 @@ export default function Footer() {
           <div className="footer-col">
             <h4>Support</h4>
             <a href="/#faq">FAQ</a>
-            <Link to="/contact">Contact Us</Link>
-            <Link to="/privacy-policy">Privacy Policy</Link>
-            <Link to="/terms-and-conditions">Terms &amp; Conditions</Link>
-            <Link to="/refund-policy">Refund Policy</Link>
+            <a href="/contact">Contact Us</a>
+            <a href="/privacy-policy">Privacy Policy</a>
+            <a href="/terms-and-conditions">Terms &amp; Conditions</a>
+            <a href="/refund-policy">Refund Policy</a>
           </div>
           <div className="footer-col">
             <h4>Get Started</h4>
-            <Link to="/register">Free Trial</Link>
+            <a href="/register">Free Trial</a>
             <a href="/#pricing">View Plans</a>
-            <Link to="/contact">Book a Call</Link>
+            <a href="/contact">Book a Call</a>
           </div>
         </div>
         <div className="footer-bottom">

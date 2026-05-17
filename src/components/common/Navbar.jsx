@@ -20,9 +20,20 @@ export default function Navbar() {
   }, [location])
 
   const handleNavLink = (e, hash) => {
+    setMenuOpen(false)
+
     if (isHome) {
       e.preventDefault()
       document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
+  const handleLogoClick = (e) => {
+    setMenuOpen(false)
+
+    if (isHome) {
+      e.preventDefault()
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
@@ -30,10 +41,10 @@ export default function Navbar() {
     <>
       <nav className={`navbar${scrolled ? ' scrolled' : ''}`} id="navbar">
         <div className="container">
-          <Link to="/" className="nav-logo">
+          <Link to="/" className="nav-logo" onClick={handleLogoClick}>
             <img src={`/images/${scrolled ? 'mmb-logo' : 'mmb-logo-white'}.svg`} alt="MMB" className="nav-logo-img" />
           </Link>
-          <div className={`nav-links${menuOpen ? ' open' : ''}`} id="navLinks">
+          <div className={`nav-links${menuOpen ? ' active' : ''}`} id="navLinks">
             <a href={isHome ? '#features' : '/#features'} onClick={(e) => handleNavLink(e, '#features')}>Services</a>
             <a href={isHome ? '#pricing' : '/#pricing'} onClick={(e) => handleNavLink(e, '#pricing')}>Pricing</a>
             <a href={isHome ? '#samples' : '/#samples'} onClick={(e) => handleNavLink(e, '#samples')}>Work</a>

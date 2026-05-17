@@ -1,3 +1,5 @@
+import { useScrollReveal } from '@/hooks/useScrollReveal'
+
 const features = [
   { num: '01', title: 'Professional Social Media Designs', desc: 'Eye-catching posts that align with your brand guidelines and captivate your audience.' },
   { num: '02', title: 'Engaging Reels for Your Brand', desc: 'Scroll-stopping short videos that boost engagement and grow your reach on Instagram.' },
@@ -8,8 +10,10 @@ const features = [
 ]
 
 export default function FeaturesSection() {
+  const ref = useScrollReveal()
+
   return (
-    <section className="features-section" id="features">
+    <section className="features-section" id="features" ref={ref}>
       <div className="container">
         <div className="features-layout">
           <div className="features-left">
