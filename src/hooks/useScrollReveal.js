@@ -8,7 +8,7 @@ export function useScrollReveal(options = {}, deps = []) {
     if (!el) return
 
     const elements = el.querySelectorAll(
-      '.reveal, .reveal-left, .reveal-right, .reveal-scale'
+      '.reveal, .reveal-left, .reveal-right, .reveal-scale, .scroll-card'
     )
 
     const observer = new IntersectionObserver(
@@ -16,6 +16,7 @@ export function useScrollReveal(options = {}, deps = []) {
         entries.forEach((e) => {
           if (e.isIntersecting) {
             e.target.classList.add('active')
+            e.target.classList.add('visible')
           }
         })
       },

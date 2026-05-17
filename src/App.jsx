@@ -1,4 +1,5 @@
-import { Routes, Route, Outlet } from 'react-router-dom'
+import { useLayoutEffect } from 'react'
+import { Routes, Route, Outlet, useLocation } from 'react-router-dom'
 import Navbar from '@/components/common/Navbar'
 import Footer from '@/components/common/Footer'
 import WhatsAppFAB from '@/components/common/WhatsAppFAB'
@@ -24,9 +25,42 @@ import PlansAndBilling from '@/pages/dashboard/PlansAndBilling'
 import ProfilePage from '@/pages/dashboard/ProfilePage'
 import SettingsPage from '@/pages/dashboard/SettingsPage'
 
+function ScrollToTop() {
+  const { pathname, hash, key } = useLocation()
+
+  useLayoutEffect(() => {
+    const scrollTop = () => {
+      window.scrollTo(0, 0)
+      document.documentElement.scrollTop = 0
+      document.body.scrollTop = 0
+    }
+
+    if (hash) {
+      const scrollToHash = () => {
+        document.querySelector(hash)?.scrollIntoView({ behavior: 'smooth' })
+      }
+
+      setTimeout(scrollToHash, 100)
+      return
+    }
+
+    scrollTop()
+    const frame = requestAnimationFrame(scrollTop)
+    const timer = setTimeout(scrollTop, 0)
+
+    return () => {
+      cancelAnimationFrame(frame)
+      clearTimeout(timer)
+    }
+  }, [pathname, hash, key])
+
+  return null
+}
+
 function PublicLayout() {
   return (
     <>
+      <ScrollToTop />
       <ScrollProgress />
       <Navbar />
       <Outlet />
