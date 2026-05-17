@@ -1,4 +1,34 @@
+import { useState } from 'react'
+import { submitInquiry } from '../api/inquiryService'
+
+const INITIAL_FORM = { name: '', email: '', phone: '', query_type: '', notes: '' }
+
 export default function ContactPage() {
+  const [form, setForm] = useState(INITIAL_FORM)
+  const [loading, setLoading] = useState(false)
+  const [inquiryNumber, setInquiryNumber] = useState(null)
+  const [error, setError] = useState('')
+
+  const handleChange = (e) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    setInquiryNumber(null)
+    try {
+      const { data } = await submitInquiry(form)
+      setInquiryNumber(data.inquiry_number)
+      setForm(INITIAL_FORM)
+    } catch (err) {
+      setError(err.response?.data?.error || 'Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <main>
       <section className="policy-hero dark-theme">
@@ -54,31 +84,63 @@ export default function ContactPage() {
               <h2>Send an inquiry</h2>
               <p>Share a few details and we will get back to you through email, phone, or WhatsApp.</p>
 
-              <form
-                className="contact-form"
-                action="mailto:cotactus@makemybrand.live"
-                method="post"
-                encType="text/plain"
-              >
+              {inquiryNumber && (
+                <div className="form-success">
+                  Thank you! Your inquiry has been submitted. Your inquiry number is <strong>{inquiryNumber}</strong> — keep it for future reference. We will get back to you soon.
+                </div>
+              )}
+
+              {error && <div className="form-error">{error}</div>}
+
+              <form className="contact-form" onSubmit={handleSubmit}>
                 <div className="form-row">
                   <div className="form-field">
                     <label htmlFor="contactName">Name</label>
-                    <input type="text" id="contactName" name="Name" autoComplete="name" required />
+                    <input
+                      type="text"
+                      id="contactName"
+                      name="name"
+                      autoComplete="name"
+                      required
+                      value={form.name}
+                      onChange={handleChange}
+                    />
                   </div>
                   <div className="form-field">
                     <label htmlFor="contactEmail">Email ID</label>
-                    <input type="email" id="contactEmail" name="Email" autoComplete="email" required />
+                    <input
+                      type="email"
+                      id="contactEmail"
+                      name="email"
+                      autoComplete="email"
+                      required
+                      value={form.email}
+                      onChange={handleChange}
+                    />
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="form-field">
                     <label htmlFor="contactPhone">Phone</label>
-                    <input type="tel" id="contactPhone" name="Phone" autoComplete="tel" required />
+                    <input
+                      type="tel"
+                      id="contactPhone"
+                      name="phone"
+                      autoComplete="tel"
+                      value={form.phone}
+                      onChange={handleChange}
+                    />
                   </div>
                   <div className="form-field">
                     <label htmlFor="contactQuery">Query Type</label>
-                    <select id="contactQuery" name="Query Type" required>
+                    <select
+                      id="contactQuery"
+                      name="query_type"
+                      required
+                      value={form.query_type}
+                      onChange={handleChange}
+                    >
                       <option value="">Select a query</option>
                       <option>📦 Packages &amp; Pricing</option>
                       <option>🎨 Custom Design Request</option>
@@ -92,10 +154,19 @@ export default function ContactPage() {
 
                 <div className="form-field">
                   <label htmlFor="contactNotes">Notes</label>
-                  <textarea id="contactNotes" name="Notes" placeholder="Tell us what you need help with..." />
+                  <textarea
+                    id="contactNotes"
+                    name="notes"
+                    placeholder="Tell us what you need help with..."
+                    required
+                    value={form.notes}
+                    onChange={handleChange}
+                  />
                 </div>
 
-                <button type="submit" className="btn btn-primary">Submit Inquiry</button>
+                <button type="submit" className="btn btn-primary" disabled={loading}>
+                  {loading ? 'Submitting...' : 'Submit Inquiry'}
+                </button>
               </form>
             </section>
           </div>
