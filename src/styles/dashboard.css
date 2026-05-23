@@ -16,7 +16,7 @@ a{text-decoration:none;color:inherit}
 /* ===== SIDEBAR ===== */
 .db-sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:transform var(--transition)}
 .db-sidebar-top{padding:24px 24px 16px;border-bottom:1px solid var(--border)}
-.db-sidebar-logo img{height:28px}
+.db-sidebar-logo img{height:52px}
 .db-sidebar-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
 .db-nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:none;background:none;font:500 0.9rem var(--font);color:var(--text-muted);cursor:pointer;transition:all var(--transition);width:100%;text-align:left;position:relative}
 .db-nav-item:hover{background:var(--red-subtle);color:var(--text)}
@@ -35,16 +35,16 @@ a{text-decoration:none;color:inherit}
 .db-main{margin-left:var(--sidebar-w);padding:32px 40px 100px;min-height:100vh;transition:margin var(--transition)}
 
 /* ===== MOBILE HEADER ===== */
-.db-mobile-header{display:none;position:fixed;top:0;left:0;right:0;height:60px;background:#fff;border-bottom:1px solid var(--border);z-index:90;padding:0 16px;align-items:center;justify-content:space-between}
-.db-mobile-logo img{height:24px}
+.db-mobile-header{display:none;position:fixed;top:0;left:0;right:0;height:60px;background:#fff;border-bottom:1px solid var(--border);z-index:101;padding:0 16px;align-items:center;justify-content:space-between}
+.db-mobile-logo img{height:52px}
 .db-menu-toggle{display:flex;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
 .db-menu-toggle span{width:22px;height:2px;background:var(--text);border-radius:2px;transition:all var(--transition)}
 .db-menu-toggle.active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
 .db-menu-toggle.active span:nth-child(2){opacity:0}
 .db-menu-toggle.active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
 .db-mobile-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red-bright));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem}
-.db-sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;opacity:0;transition:opacity var(--transition)}
-.db-sidebar-overlay.active{opacity:1}
+.db-sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;opacity:0;pointer-events:none;transition:opacity var(--transition)}
+.db-sidebar-overlay.active{opacity:1;pointer-events:auto}
 
 /* ===== PAGES ===== */
 .db-page{display:none;animation:pageIn 0.4s ease}

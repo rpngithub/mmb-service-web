@@ -1,7 +1,30 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { getUserDesigns } from '@/api/designService'
+import { getUserDesigns, serveDesignFile, viewDesignFile } from '@/api/designService'
+
+function DesignImage({ mnemonicId, alt, className }) {
+  const [src, setSrc] = React.useState(null)
+
+  React.useEffect(() => {
+    let objectUrl = null
+    let cancelled = false
+    viewDesignFile(mnemonicId)
+      .then(({ data }) => {
+        if (cancelled) return
+        objectUrl = URL.createObjectURL(data)
+        setSrc(objectUrl)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+    }
+  }, [mnemonicId])
+
+  if (!src) return <div style={{ width: '100%', aspectRatio: '1', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: '1.5rem' }}>🖼</div>
+  return <img src={src} alt={alt} className={className} />
+}
 
 const FREE_SAMPLES = [
   { id: 1, name: 'Post 1', src: '/images/sample-1.png' },
@@ -14,7 +37,25 @@ export default function MyDesigns() {
   const [tab, setTab] = useState('free')
   const [designs, setDesigns] = useState([])
   const [preview, setPreview] = useState(null)
+  const [downloading, setDownloading] = useState(null)
   const navigate = useNavigate()
+
+  const handleDownload = async (mnemonicId, name) => {
+    if (downloading === mnemonicId) return
+    setDownloading(mnemonicId)
+    try {
+      const { data } = await serveDesignFile(mnemonicId)
+      const url = URL.createObjectURL(data)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = name || mnemonicId
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+    } finally {
+      setDownloading(null)
+    }
+  }
 
   useEffect(() => {
     getUserDesigns()
@@ -39,10 +80,10 @@ export default function MyDesigns() {
             {designs.filter(d => d.subscription_id).map((d) => (
               <div key={d.id} className="db-design-card">
                 <div className="db-design-thumb">
-                  <img src={d.src} alt={d.name} />
+                  <DesignImage mnemonicId={d.mnemonic_id} alt={d.name} />
                   <div className="db-design-overlay">
                     <button className="db-overlay-btn" onClick={() => setPreview(d)} aria-label="Preview">👁</button>
-                    <a className="db-overlay-btn download" href={d.src} download aria-label="Download">⬇</a>
+                    <button className="db-overlay-btn download" onClick={() => handleDownload(d.mnemonic_id, d.name)} aria-label="Download" disabled={downloading === d.mnemonic_id}>{downloading === d.mnemonic_id ? '…' : '⬇'}</button>
                   </div>
                 </div>
                 <div className="db-design-info">
@@ -92,10 +133,10 @@ export default function MyDesigns() {
             {designs.filter(d => !d.subscription_id).map((d) => (
               <div key={d.id} className="db-design-card">
                 <div className="db-design-thumb">
-                  <img src={d.src} alt={d.name} />
+                  <DesignImage mnemonicId={d.mnemonic_id} alt={d.name} />
                   <div className="db-design-overlay">
                     <button className="db-overlay-btn" onClick={() => setPreview(d)} aria-label="Preview">👁</button>
-                    <a className="db-overlay-btn download" href={d.src} download aria-label="Download">⬇</a>
+                    <button className="db-overlay-btn download" onClick={() => handleDownload(d.mnemonic_id, d.name)} aria-label="Download" disabled={downloading === d.mnemonic_id}>{downloading === d.mnemonic_id ? '…' : '⬇'}</button>
                   </div>
                 </div>
                 <div className="db-design-info">
@@ -124,10 +165,10 @@ export default function MyDesigns() {
             {designs.map((d) => (
               <div key={d.id} className="db-design-card">
                 <div className="db-design-thumb">
-                  <img src={d.file_url || '/images/sample-1.png'} alt={d.title || 'Design'} />
+                  <DesignImage mnemonicId={d.mnemonic_id} alt={d.title || 'Design'} />
                   <div className="db-design-overlay">
-                    <button className="db-overlay-btn" onClick={() => setPreview({ src: d.file_url, name: d.title })} aria-label="Preview">👁</button>
-                    <a className="db-overlay-btn download" href={d.file_url} download aria-label="Download">⬇</a>
+                    <button className="db-overlay-btn" onClick={() => setPreview({ src: d.file_url, name: d.title, mnemonic_id: d.mnemonic_id })} aria-label="Preview">👁</button>
+                    <button className="db-overlay-btn download" onClick={() => handleDownload(d.mnemonic_id, d.title)} aria-label="Download" disabled={downloading === d.mnemonic_id}>{downloading === d.mnemonic_id ? '…' : '⬇'}</button>
                   </div>
                 </div>
                 <div className="db-design-info">
@@ -156,9 +197,9 @@ export default function MyDesigns() {
         <div className="db-modal-overlay" style={{ display: 'flex' }} onClick={() => setPreview(null)}>
           <div className="db-modal" onClick={(e) => e.stopPropagation()}>
             <button className="db-modal-close" onClick={() => setPreview(null)}>✕</button>
-            <img src={preview.src} alt={preview.name} className="db-modal-img" />
+            <DesignImage mnemonicId={preview.mnemonic_id} alt={preview.name} className="db-modal-img" />
             <div className="db-modal-actions">
-              <a className="db-action-btn primary download" href={preview.src} download>⬇ Download</a>
+              <button className="db-action-btn primary" onClick={() => handleDownload(preview.mnemonic_id, preview.name)} disabled={downloading === preview.mnemonic_id}>{downloading === preview.mnemonic_id ? 'Downloading…' : '⬇ Download'}</button>
             </div>
           </div>
         </div>
