@@ -12,10 +12,10 @@ const OTHER_INDUSTRY_OPTIONS = [
 ]
 
 export default function ProfilePage() {
-  const { user, business, subscription, freeTrial } = useAuth()
+  const { user, business, subscription, freeTrial, setUserProfile } = useAuth()
   const [toast, setToast] = useState('')
   const [saving, setSaving] = useState(false)
-  const [industry, setIndustry] = useState([business?.business_id || ''])
+  const [industry, setIndustry] = useState([business?.business_id !== null ? business.business_id : -1])
   const [businesses, setBusinesses] = useState([]);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export default function ProfilePage() {
   const onSubmit = async (data) => {
     setSaving(true)
     try {
-      await updateProfile({
+      const { data: updatedProfile } = await updateProfile({
         name: data.name,
         email: data.email,
         userBusiness: {
@@ -62,9 +62,11 @@ export default function ProfilePage() {
           business_other: industry[0] === -1 ? data.otherIndustry : null,
           website: data.website,
         },
-      })
+      });
+      setUserProfile(updatedProfile);
       showToast('✅ Profile updated successfully!')
-    } catch {
+    } catch (error) {
+      console.error('Failed to update profile:', error);
       showToast('❌ Failed to save changes. Please try again.')
     } finally {
       setSaving(false)

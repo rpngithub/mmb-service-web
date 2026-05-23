@@ -89,7 +89,7 @@ export default function DashboardLayout() {
       />
 
       {/* Sidebar */}
-      <aside className={`db-sidebar${sidebarOpen ? ' open' : ''}`}>
+      <aside className={`db-sidebar${sidebarOpen ? ' active' : ''}`}>
         <div className="db-sidebar-top">
           <Link to="/" className="db-sidebar-logo">
             <img src="/images/mmb-logo.svg" alt="MMB" />
