@@ -20,7 +20,7 @@ const clients = [
   // { src: '/images/clients/Massey.png', alt: 'Massey' },
   { src: '/images/clients/MED.png', alt: 'MED' },
   { src: '/images/clients/MER.png', alt: 'MER' },
-  { src: '/images/clients/Moldtek.png', alt: 'Moldtek' },
+  // { src: '/images/clients/Moldtek.png', alt: 'Moldtek' },
   { src: '/images/clients/Oneshop.png', alt: 'Oneshop' },
   { src: '/images/clients/PC.png', alt: 'PC' },
   { src: '/images/clients/REGULATORY REPORTING SOLUTION.png', alt: 'Regulatory Reporting Solution' },
