@@ -56,7 +56,7 @@ export default function ContactPage() {
                 </div>
                 <div className="contact-item">
                   <span>Phone</span>
-                  <a href="tel:+916380271857">+91 6380271857</a>
+                  <a href="tel:+919384840808">+91 9384840808</a>
                 </div>
                 <div className="contact-item">
                   <span>Registered Address</span>
@@ -70,7 +70,7 @@ export default function ContactPage() {
                   plan or next step.
                 </p>
                 <a
-                  href="https://wa.me/916380271857?text=Hi%2C%20I%27d%20like%20to%20know%20more%20about%20Make%20my%20Brand."
+                  href={`https://wa.me/${import.meta.env.VITE_WA_NUMBER}?text=Hi%2C%20I%27d%20like%20to%20know%20more%20about%20Make%20my%20Brand.`}
                   className="btn"
                   target="_blank"
                   rel="noopener"
