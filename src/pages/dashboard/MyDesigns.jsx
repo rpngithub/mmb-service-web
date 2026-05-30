@@ -7,19 +7,14 @@ function DesignImage({ mnemonicId, alt, className }) {
   const [src, setSrc] = React.useState(null)
 
   React.useEffect(() => {
-    let objectUrl = null
     let cancelled = false
     viewDesignFile(mnemonicId)
       .then(({ data }) => {
         if (cancelled) return
-        objectUrl = URL.createObjectURL(data)
-        setSrc(objectUrl)
+        setSrc(data.url)
       })
       .catch(() => {})
-    return () => {
-      cancelled = true
-      if (objectUrl) URL.revokeObjectURL(objectUrl)
-    }
+    return () => { cancelled = true }
   }, [mnemonicId])
 
   if (!src) return <div style={{ width: '100%', aspectRatio: '1', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: '1.5rem' }}>🖼</div>
@@ -45,12 +40,7 @@ export default function MyDesigns() {
     setDownloading(mnemonicId)
     try {
       const { data } = await serveDesignFile(mnemonicId)
-      const url = URL.createObjectURL(data)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = name || mnemonicId
-      a.click()
-      URL.revokeObjectURL(url)
+      window.open(data.url, '_blank')
     } catch {
     } finally {
       setDownloading(null)
