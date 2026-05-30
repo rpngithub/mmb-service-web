@@ -8,5 +8,5 @@ export const uploadDesign = (formData) =>
   })
 export const updateUserDesign = (id, data) => client.put(`/user-designs/${id}`, data)
 export const deleteUserDesign = (id) => client.delete(`/user-designs/${id}`)
-export const serveDesignFile = (id) => client.get(`/user-designs/${id}/file`, { responseType: 'blob' })
-export const viewDesignFile = (id) => client.get(`/user-designs/${id}/view`, { responseType: 'blob' })
+export const serveDesignFile = (id) => client.get(`/user-designs/${id}/file`)
+export const viewDesignFile = (id) => client.get(`/user-designs/${id}/view`)
